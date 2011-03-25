@@ -1,0 +1,15 @@
+C:\Users\Massimiliano.Peluso\Desktop\JqueryController\obj\Debug\ResolveAssemblyReference.cache
+C:\Users\Massimiliano.Peluso\Desktop\JqueryController\bin\Debug\JqueryUpdatePanel.dll
+C:\Users\Massimiliano.Peluso\Desktop\JqueryController\bin\Debug\JqueryUpdatePanel.pdb
+C:\Users\Massimiliano.Peluso\Desktop\JqueryController\obj\Debug\JqueryUpdatePanel.dll
+C:\Users\Massimiliano.Peluso\Desktop\JqueryController\obj\Debug\JqueryUpdatePanel.pdb
+C:\Users\Massimiliano\Documents\Visual Studio 2010\Projects\JqueryControlv3.0\bin\Debug\JqueryUpdatePanel.dll
+C:\Users\Massimiliano\Documents\Visual Studio 2010\Projects\JqueryControlv3.0\bin\Debug\JqueryUpdatePanel.pdb
+C:\Users\Massimiliano\Documents\Visual Studio 2010\Projects\JqueryControlv3.0\obj\Debug\ResolveAssemblyReference.cache
+C:\Users\Massimiliano\Documents\Visual Studio 2010\Projects\JqueryControlv3.0\obj\Debug\JqueryUpdatePanel.dll
+C:\Users\Massimiliano\Documents\Visual Studio 2010\Projects\JqueryControlv3.0\obj\Debug\JqueryUpdatePanel.pdb
+C:\Users\Massimiliano.Peluso\Documents\Visual Studio 2010\Projects\JqueryControlv3.0\bin\Debug\JqueryUpdatePanel.dll
+C:\Users\Massimiliano.Peluso\Documents\Visual Studio 2010\Projects\JqueryControlv3.0\bin\Debug\JqueryUpdatePanel.pdb
+C:\Users\Massimiliano.Peluso\Documents\Visual Studio 2010\Projects\JqueryControlv3.0\obj\Debug\ResolveAssemblyReference.cache
+C:\Users\Massimiliano.Peluso\Documents\Visual Studio 2010\Projects\JqueryControlv3.0\obj\Debug\JqueryUpdatePanel.dll
+C:\Users\Massimiliano.Peluso\Documents\Visual Studio 2010\Projects\JqueryControlv3.0\obj\Debug\JqueryUpdatePanel.pdb

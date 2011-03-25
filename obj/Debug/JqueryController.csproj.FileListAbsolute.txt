@@ -1,0 +1,5 @@
+C:\Users\Massimiliano.Peluso\Desktop\JqueryController\bin\Debug\JqueryController.dll
+C:\Users\Massimiliano.Peluso\Desktop\JqueryController\bin\Debug\JqueryController.pdb
+C:\Users\Massimiliano.Peluso\Desktop\JqueryController\obj\Debug\ResolveAssemblyReference.cache
+C:\Users\Massimiliano.Peluso\Desktop\JqueryController\obj\Debug\JqueryController.dll
+C:\Users\Massimiliano.Peluso\Desktop\JqueryController\obj\Debug\JqueryController.pdb
