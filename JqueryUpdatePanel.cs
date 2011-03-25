@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
-using System.Linq;
 using System.Text;
 using System.Web;
 using System.Web.UI;
@@ -13,19 +12,38 @@ namespace JqueryWebControls
     [ToolboxBitmap(typeof(JqueryUpdatePanel), "IC170241.gif")]
     public class JqueryUpdatePanel : Panel
     {
-        private string TriggerId { get; set; }
+        public delegate bool OnServerValidateDelegate(IList<ArgumentItem> arguments);
+
+        public delegate void ActionDelegate(IList<ArgumentItem> arguments);
+
+
+
+        private string ActionDelegateName
+        {
+            get
+            {
+                return HttpContext.Current.Request.Form["__actionDelegate"] ?? string.Empty;
+            }
+        }
+
+        private string OnServerValidate
+        {
+            get
+            {
+                return HttpContext.Current.Request.Form["__OnServerValidate"] ?? string.Empty;
+            }
+        }
 
         private readonly List<string> _clientCallBackParameters = new List<string>();
 
-        public delegate bool OnServerValidateDelegate(Dictionary<string, string> arguments);
 
-        public OnServerValidateDelegate OnServerValidateAction { get; set; }
+
 
         private bool _isValid = true;
 
         private bool _autoReferenceJquery = false;
 
-        private Dictionary<string, string> _postBackArguments = new Dictionary<string, string>();
+        private IList<ArgumentItem> _postBackArguments = new List<ArgumentItem>();
 
         private bool IsValid
         {
@@ -33,12 +51,17 @@ namespace JqueryWebControls
             set { _isValid = value; }
         }
 
-        private readonly List<TriggerControlItem> _triggerControls = new List<TriggerControlItem>();
+
         /// <summary>
         /// Progress panel that will be showed during the async post back. It can be used to show a "loading" image to notify the user the post back is happening
         /// 
         /// </summary>
-        public string JqueryUpdateProgress { get; set; }
+        public string JqueryUpdateProgress { 
+            get
+            {
+                return HttpContext.Current.Request["__jqueryProgress"];
+            }
+        }
 
 
         /// <summary>
@@ -61,10 +84,7 @@ namespace JqueryWebControls
         /// <summary>
         /// Collection of TriggerControlItem.
         /// </summary>
-        public List<TriggerControlItem> TriggerControls
-        {
-            get { return _triggerControls; }
-        }
+
 
         public bool IsJQueryPost
         {
@@ -90,7 +110,7 @@ namespace JqueryWebControls
         {
             base.OnLoad(e);
             string sender = HttpContext.Current.Request.Form["__sender"];
-            if (sender == ClientID)
+            if (!(string.IsNullOrEmpty(sender)) && ClientID.EndsWith(sender, true, null))
             {
                 _isJqueryPost = true;
                 PopulateFormPostArguments();
@@ -116,12 +136,8 @@ namespace JqueryWebControls
                     {
                         var name = value.Split('=')[0];
                         var Value = value.Split('=')[1];
-                        foreach (var control in TriggerControls)
-                        {
-                            if (name != "__VIEWSTATE" && name != "__EVENTVALIDATION")
-                                control.PostBackArguments.Add(name, Value);
-                            _postBackArguments.Add(name, Value);
-                        }
+                        if (name != "__VIEWSTATE" && name != "__EVENTVALIDATION")
+                            _postBackArguments.Add(new ArgumentItem(name, Value));
                     }
                 }
             }
@@ -134,15 +150,10 @@ namespace JqueryWebControls
 
         private void PopulateJsonAttribute()
         {
-            //
             var jsonAttribute = HttpContext.Current.Request.Form["__jsonAttribute"];
             if (!string.IsNullOrEmpty(jsonAttribute))
             {
-                foreach (var control in TriggerControls)
-                {
-                    control.PostBackArguments.Add("JsonAttribute", jsonAttribute);
-                    _postBackArguments.Add("JsonAttribute", jsonAttribute);
-                }
+                _postBackArguments.Add(new ArgumentItem("JsonAttribute", jsonAttribute));
             }
         }
 
@@ -153,16 +164,16 @@ namespace JqueryWebControls
 
         private void AddClientEventHandler()
         {
-            if (_triggerControls == null) return;
-            foreach (var triggerControl in _triggerControls)
-            {
-                var jsToAdd = "JqueryPost('" + GetPageName() +
-                              "','" + ClientID +
-                              "','" + triggerControl.TriggerWebControl.ClientID +
-                              "','" + GetJqueryUpdateProgress() +
-                              "');return false";
-                AddEventHanlder(triggerControl, jsToAdd);
-            }
+            //if (_triggerControls == null) return;
+            //foreach (var triggerControl in _triggerControls)
+            //{
+            //    var jsToAdd = "JqueryPost('" + GetPageName() +
+            //                  "','" + ClientID +
+            //                  "','" + triggerControl.TriggerWebControl.ClientID +
+            //                  "','" + GetJqueryUpdateProgress() +
+            //                  "');return false";
+            //    AddEventHanlder(triggerControl, jsToAdd);
+            //}
         }
 
         public void JqueryDataBind()
@@ -170,62 +181,54 @@ namespace JqueryWebControls
             AddClientEventHandler();
         }
 
-        private static void AddEventHanlder(TriggerControlItem triggerControl, string jqueryPostHandler)
-        {
-            string triggerEvent = triggerControl.TriggerWebControlEvent.ToString();
-            try
-            {
-                var previosHandler = string.Empty;
-                if (triggerControl.TriggerWebControl.Attributes[triggerEvent] != null)
-                {
-                    previosHandler = triggerControl.TriggerWebControl.Attributes[triggerEvent];
-                    triggerControl.TriggerWebControl.Attributes.Remove(triggerEvent);
-                }
-                jqueryPostHandler = previosHandler + jqueryPostHandler;
-                triggerControl.TriggerWebControl.Attributes.Add(triggerEvent, jqueryPostHandler);
-            }
-            catch (System.ArgumentException)
-            {
-                throw new ArgumentException("TriggerWebControlEvent cannot be null");
-            }
+        //private static void AddEventHanlder(TriggerControlItem triggerControl, string jqueryPostHandler)
+        //{
+        //    //string triggerEvent = triggerControl.TriggerWebControlEvent.ToString();
+        //    //try
+        //    //{
+        //    //    var previosHandler = string.Empty;
+        //    //    if (triggerControl.TriggerWebControl.Attributes[triggerEvent] != null)
+        //    //    {
+        //    //        previosHandler = triggerControl.TriggerWebControl.Attributes[triggerEvent];
+        //    //        triggerControl.TriggerWebControl.Attributes.Remove(triggerEvent);
+        //    //    }
+        //    //    jqueryPostHandler = previosHandler + jqueryPostHandler;
+        //    //    triggerControl.TriggerWebControl.Attributes.Add(triggerEvent, jqueryPostHandler);
+        //    //}
+        //    //catch (System.ArgumentException)
+        //    //{
+        //    //    throw new ArgumentException("TriggerWebControlEvent cannot be null");
+        //    //}
 
-        }
+        //}
 
         private void InvokeOnServerValidate()
         {
-            if (OnServerValidateAction != null)
-            {
-                IsValid = OnServerValidateAction.Invoke(_postBackArguments);
-            }
+            if (string.IsNullOrEmpty(OnServerValidate)) return;
+            var delegateToInvoke = (OnServerValidateDelegate)Delegate.CreateDelegate(
+                typeof(OnServerValidateDelegate), Page, OnServerValidate, true);
+            IsValid = delegateToInvoke.Invoke(_postBackArguments);
         }
 
         private void InvokeServerActionDelegate()
         {
-            var hasBeenInvoked = false;
-            if (_isJqueryPost == false || IsValid == false) return;
-            var control = GetTriggerControlRaised();
-            {
-                if (hasBeenInvoked == false && control.PostBackAction != null)
-                {
-                    var postaction = (TriggerControlItem.ActionDelegate)control.PostBackAction.Clone();
-                    postaction.Invoke(control.PostBackArguments);
-                    hasBeenInvoked = true;
-                }
-            }
+            if (string.IsNullOrEmpty(ActionDelegateName)) return;
+            var delegateToInvoke = (ActionDelegate)Delegate.CreateDelegate(
+                               typeof(OnServerValidateDelegate), Page, ActionDelegateName, true);
+            delegateToInvoke.Invoke(_postBackArguments);
         }
 
-        private TriggerControlItem GetTriggerControlRaised()
-        {
-            var sender = HttpContext.Current.Request.Form["__trigger"];
-            var controlToReturn =
-                TriggerControls.ToList().Where(x => x.TriggerWebControl.ClientID == sender).SingleOrDefault();
-            return controlToReturn;
-        }
+        //private TriggerControlItem GetTriggerControlRaised()
+        //{
+        //    var sender = HttpContext.Current.Request.Form["__trigger"];
+        //    var controlToReturn =
+        //        TriggerControls.ToList().Where(x => x.TriggerWebControl.ClientID == sender).SingleOrDefault();
+        //    return controlToReturn;
+        //}
 
         private string GetValidationGroupToShow()
         {
-            var control = GetTriggerControlRaised();
-            return control != null ? control.TriggerWebControl.Attributes["JQueryValidationGroup"] : string.Empty;
+            return HttpContext.Current.Request.Form["__JQueryValidationGroup"];
         }
 
 
@@ -259,15 +262,19 @@ namespace JqueryWebControls
             var sb = new StringBuilder();
             var tw = new StringWriter(sb);
             var hw = new HtmlTextWriter(tw);
-            string data;
+            string data = string.Empty;
             RenderContents(hw);
             var htmlToAdd = sb.ToString();
             htmlToAdd = htmlToAdd.Replace("\\", "\\\\");
             htmlToAdd = htmlToAdd.Replace(Environment.NewLine, string.Empty);
             htmlToAdd = htmlToAdd.Replace(@"""", "\\\"");
+
             if (IsValid)
             {
-                data = @"$(""#" + ClientID + @""").html(""" + htmlToAdd + @""");HideValidationMessage('" + GetValidationGroupToShow() + "');" + GetCallBackFunction();
+                if (htmlToAdd != string.Empty)
+                {
+                    data = @"$(""#" + ClientID + @""").html(""" + htmlToAdd + @""");HideValidationMessage('" + GetValidationGroupToShow() + "');" + GetCallBackFunction();
+                }
                 //RefreshPanel(ClientID,htmlToAdd,ValidationGroup,callBackFunction,callBackFunctionParameters){
                 // data = "RefreshPanel('" + ClientID + "','" + htmlToAdd + "','" + ValidationGroup + "');";
             }
@@ -283,9 +290,10 @@ namespace JqueryWebControls
         {
             const string resourceName = "JqueryWebControls.JqueryController.js";
             var cs = Page.ClientScript;
-            cs.RegisterClientScriptResource(typeof(JqueryUpdatePanel), resourceName);
             if (!AutoReferenceJquery) return;
             cs.RegisterClientScriptInclude("JqueryInclude", "http://ajax.googleapis.com/ajax/libs/jquery/1.2.6/jquery.min.js");
+            cs.RegisterClientScriptResource(typeof(JqueryUpdatePanel), resourceName);
+
         }
 
 

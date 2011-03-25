@@ -12,7 +12,7 @@ namespace JqueryWebControls
         /// Delegate that is called by the JqueryUpdatePanle before render back the response
         /// </summary>
         /// <param name="arguments">All the hidden field hooked up to this control</param>
-        public delegate void ActionDelegate(Dictionary<string,string > arguments);
+      
 
 
         public string CommandName { get; set; }
